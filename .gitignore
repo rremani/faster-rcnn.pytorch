@@ -1,5 +1,10 @@
 data/*
-
+images/*
+trained-models/*
+output/*
+table_img/*
+#./.*csv
+demo_results/*
 # READ THIS BEFORE YOU REFACTOR ME
 #
 # setup.py uses the list of patterns in this file to decide

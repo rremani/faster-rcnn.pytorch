@@ -15,8 +15,20 @@ from datasets.pascal_voc import pascal_voc
 from datasets.coco import coco
 from datasets.imagenet import imagenet
 from datasets.vg import vg
-
+from datasets.tables import tables
 import numpy as np
+import os
+cwd = os.getcwd()
+#print(cwd,'+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++')
+
+# Custom data
+
+tables_devkit_path = cwd+'/data/TABLES'
+for split in ['train', 'test']:
+    name = '{}_{}'.format('tables', split)
+    print(name,'++++++++++++++++++++++++++++++++--------------------------',tables_devkit_path)
+    __sets[name] = (lambda split=split: tables(split, tables_devkit_path))
+
 
 # Set up voc_<year>_<split>
 for year in ['2007', '2012']:
