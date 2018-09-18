@@ -52,6 +52,9 @@ def parse_args():
   Parse input arguments
   """
   parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
+  parser.add_argument('--test_csv', dest='test_csv',
+                      help='test dataset',
+                      default='truecover_tables.csv', type=str)
   parser.add_argument('--dataset', dest='dataset',
                       help='training dataset',
                       default='pascal_voc', type=str)
@@ -659,7 +662,7 @@ if __name__ == '__main__':
         
             
           ########### Testing ######################################################
-          df = pd.read_csv('truecover_tables.csv')
+          df = pd.read_csv(args.test_csv)
           cfg.USE_GPU_NMS = True
           torch.device = 'cuda'
           max_per_image = 100
