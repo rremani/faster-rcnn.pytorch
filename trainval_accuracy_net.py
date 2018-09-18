@@ -52,6 +52,9 @@ def parse_args():
   Parse input arguments
   """
   parser = argparse.ArgumentParser(description='Train a Fast R-CNN network')
+  parser.add_argument('--test_epochs', dest='test_epochs',
+                      help='number of epochs to train',
+                      default=100, type=int)
   parser.add_argument('--test_csv', dest='test_csv',
                       help='test dataset',
                       default='truecover_tables.csv', type=str)
@@ -118,6 +121,9 @@ def parse_args():
 # resume trained model
   parser.add_argument('--r', dest='resume',
                       help='resume checkpoint or not',
+                      default=False, type=bool)
+  parser.add_argument('--pre', dest='old_pretrained',
+                      help='load model for transfer learning',
                       default=False, type=bool)
   parser.add_argument('--checksession', dest='checksession',
                       help='checksession to load model',
@@ -371,8 +377,11 @@ def accuracy(path_images,model,df,iou_thresh = 0.6,thresh = 0.05,NMS = 0.3):
                         if ty not in gg:
                             tp +=1
                             gg.append(ty)
-                
-    print('True Positive: {0}, Precision: {1}, Recall: {2}, Ground Truths: {3}'.format(tp,tp/tp_fp,tp/df.shape[0],df.shape[0]))
+    if tp_fp > 0:            
+   	 print('True Positive: {0}, Precision: {1}, Recall: {2}, Ground Truths: {3}'.format(tp,tp/tp_fp,tp/df.shape[0],df.shape[0]))
+    else:
+         print('True Positive: {0}, Recall: {1}, Ground Truths: {2}'.format(tp,tp/df.shape[0],df.shape[0]))
+
 
 ######################################################### TEST BLOCK ##########################################################    
     
@@ -505,7 +514,7 @@ if __name__ == '__main__':
   if args.net == 'vgg16':
     fasterRCNN = vgg16(imdb.classes, pretrained=True, class_agnostic=args.class_agnostic)
   elif args.net == 'res101':
-    fasterRCNN = resnet(imdb.classes, 101, pretrained=True, class_agnostic=args.class_agnostic)
+    fasterRCNN = resnet(imdb.classes, 101, pretrained=False, class_agnostic=args.class_agnostic)
   elif args.net == 'res50':
     fasterRCNN = resnet(imdb.classes, 50, pretrained=True, class_agnostic=args.class_agnostic)
   elif args.net == 'res152':
@@ -550,7 +559,20 @@ if __name__ == '__main__':
     if 'pooling_mode' in checkpoint.keys():
       cfg.POOLING_MODE = checkpoint['pooling_mode']
     print("loaded checkpoint %s" % (load_name))
-
+  if args.old_pretrained:
+    load_name = os.path.join('/detection/trained-models/res101/old_models/',
+      'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
+    print("loading checkpoint %s" % (load_name))
+    checkpoint = torch.load(load_name)
+    args.session = checkpoint['session']
+    args.start_epoch = checkpoint['epoch']
+    fasterRCNN.load_state_dict(checkpoint['model'])
+    #optimizer.load_state_dict(checkpoint['optimizer'])
+    #lr = optimizer.param_groups[0]['lr']
+    #momentum = 0.9
+    if 'pooling_mode' in checkpoint.keys():
+      cfg.POOLING_MODE = checkpoint['pooling_mode']
+    print("loaded checkpoint %s" % (load_name))
   if args.mGPUs:
     fasterRCNN = nn.DataParallel(fasterRCNN)
 
@@ -647,7 +669,7 @@ if __name__ == '__main__':
         'class_agnostic': args.class_agnostic,
       }, save_name)
     else:
-      #if epoch % 10 == 0:
+      if epoch % int(args.test_epochs) == 0:
 	
           save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
           save_checkpoint({
