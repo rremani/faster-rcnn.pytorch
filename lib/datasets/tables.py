@@ -49,7 +49,7 @@ class tables(imdb):
         #self._data_path = os.path.join(self._devkit_path, 'VOC' + self._year)
         self._classes = ('__background__','table')
         self._class_to_ind = dict(zip(self.classes, xrange(self.num_classes)))
-        self._image_ext = '.jpg'
+        self._image_ext = ['.png','.jpg']
         self._image_index = self._load_image_set_index()
         # Default to roidb handler
         # self._roidb_handler = self.selective_search_roidb
@@ -86,10 +86,12 @@ class tables(imdb):
         """
         Construct an image path from the image's "index" identifier.
         """
-        image_path = os.path.join(self._data_path, 'Images',
-                                  index + self._image_ext)
+        for ext in self._image_ext :
+            image_path = os.path.join(self._data_path, 'Images', index + ext)
+            if os.path.exists(image_path):
+                break
         assert os.path.exists(image_path), \
-            'Path does not exist: {}'.format(image_path)
+           'Path does not exist: {}'.format(image_path)
         return image_path
 
     def _load_image_set_index(self):
@@ -98,7 +100,7 @@ class tables(imdb):
         """
         # Example path to image set file:
         # self._devkit_path + /VOCdevkit2007/VOC2007/ImageSets/Main/val.txt
-#	print(self._data_path,'-------------------------')
+#   print(self._data_path,'-------------------------')
         image_set_file = os.path.join(self._data_path, 'ImageSets',
                                       self._image_set + '.txt')
         assert os.path.exists(image_set_file), \
