@@ -377,11 +377,15 @@ def accuracy(path_images,model,df,iou_thresh = 0.6,thresh = 0.05,NMS = 0.3):
                         if ty not in gg:
                             tp +=1
                             gg.append(ty)
-    if tp_fp > 0:            
-   	 print('True Positive: {0}, Precision: {1}, Recall: {2}, Ground Truths: {3}'.format(tp,tp/tp_fp,tp/df.shape[0],df.shape[0]))
-    else:
-         print('True Positive: {0}, Recall: {1}, Ground Truths: {2}'.format(tp,tp/df.shape[0],df.shape[0]))
 
+    fname='tplogs/tplogs_{}_{}'.format(args.session, step)
+    with open(fname+'.txt','a') as f:
+        if tp_fp > 0:            
+         print('True Positive: {0}, Precision: {1}, Recall: {2}, Ground Truths: {3}'.format(tp,tp/tp_fp,tp/df.shape[0],df.shape[0]))
+         f.write('True Positive: {0}, Precision: {1}, Recall: {2}, Ground Truths: {3}'.format(tp,tp/tp_fp,tp/df.shape[0],df.shape[0])+'\n') 
+        else:
+         print('True Positive: {0}, Recall: {1}, Ground Truths: {2}'.format(tp,tp/df.shape[0],df.shape[0]))
+         f.write('True Positive: {0}, Recall: {1}, Ground Truths: {2}'.format(tp,tp/df.shape[0],df.shape[0])+'\n')
 
 ######################################################### TEST BLOCK ##########################################################    
     
@@ -564,8 +568,8 @@ if __name__ == '__main__':
       'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
     print("loading checkpoint %s" % (load_name))
     checkpoint = torch.load(load_name)
-    args.session = checkpoint['session']
-    args.start_epoch = checkpoint['epoch']
+    #args.session = checkpoint['session']
+    #args.start_epoch = checkpoint['epoch']
     fasterRCNN.load_state_dict(checkpoint['model'])
     #optimizer.load_state_dict(checkpoint['optimizer'])
     #lr = optimizer.param_groups[0]['lr']
@@ -670,7 +674,7 @@ if __name__ == '__main__':
       }, save_name)
     else:
       if epoch % int(args.test_epochs) == 0:
-	
+    
           save_name = os.path.join(output_dir, 'faster_rcnn_{}_{}_{}.pth'.format(args.session, epoch, step))
           save_checkpoint({
             'session': args.session,

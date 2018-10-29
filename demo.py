@@ -236,7 +236,7 @@ if __name__ == '__main__':
 
   start = time.time()
   max_per_image = 100
-  thresh = 0.05
+  thresh = 0.97
   vis = True
 
   webcam_num = args.webcam_num
