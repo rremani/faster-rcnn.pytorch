@@ -130,11 +130,12 @@ class _ProposalTargetLayer(nn.Module):
         offset = torch.arange(0, batch_size)*gt_boxes.size(1)
         offset = offset.view(-1, 1).type_as(gt_assignment) + gt_assignment
 
-        labels = gt_boxes[:,:,4].contiguous().view(-1).index((offset.view(-1),)).view(batch_size, -1)
-        
+
+        labels = gt_boxes[:,:,4].contiguous().view(-1).index((offset.view(-1), ))\
+                                                            .view(batch_size, -1)
         labels_batch = labels.new(batch_size, rois_per_image).zero_()
         rois_batch  = all_rois.new(batch_size, rois_per_image, 5).zero_()
-        gt_rois_batch = all_rois.new(batch_size, rois_per_image, 5).zero_()
+        gt_rois_batch = all_rois.new(batch_size, rois_per_image, 5).zero_()<<<<<<< dev
         # Guard against the case when an image has fewer than max_fg_rois_per_image
         # foreground RoIs
         for i in range(batch_size):
@@ -178,7 +179,7 @@ class _ProposalTargetLayer(nn.Module):
                 bg_rois_per_this_image = 0
             elif bg_num_rois > 0 and fg_num_rois == 0:
                 # sampling bg
-                #rand_num = torch.floor(torch.rand(rois_per_image) * bg_num_rois).long().cuda()
+                #rand_num = torch.floor(torch.rand(rois_per_image) * bg_num_rois).long().cuda()<<<<<<< dev
                 rand_num = np.floor(np.random.rand(rois_per_image) * bg_num_rois)
                 rand_num = torch.from_numpy(rand_num).type_as(gt_boxes).long()
 

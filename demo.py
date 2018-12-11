@@ -35,6 +35,7 @@ from model.utils.blob import im_list_to_blob
 from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
 import pdb
+print('All loaded')
 
 try:
     xrange          # Python 2
@@ -61,7 +62,7 @@ def parse_args():
                       nargs=argparse.REMAINDER)
   parser.add_argument('--load_dir', dest='load_dir',
                       help='directory to load models',
-                      default="/srv/share/jyang375/models")
+                      default="/detection/trained-models/")
   parser.add_argument('--image_dir', dest='image_dir',
                       help='directory to load images for demo',
                       default="images")
@@ -158,18 +159,22 @@ if __name__ == '__main__':
   # train set
   # -- Note: Use validation set and disable the flipped to enable faster loading.
 
-  input_dir = args.load_dir + "/" + args.net + "/" + args.dataset
+  # input_dir = args.load_dir + "/" + args.net + "/" + args.dataset
+  input_dir = args.load_dir
   if not os.path.exists(input_dir):
     raise Exception('There is no input directory for loading network from ' + input_dir)
   load_name = os.path.join(input_dir,
     'faster_rcnn_{}_{}_{}.pth'.format(args.checksession, args.checkepoch, args.checkpoint))
 
-  pascal_classes = np.asarray(['__background__',
-                       'aeroplane', 'bicycle', 'bird', 'boat',
-                       'bottle', 'bus', 'car', 'cat', 'chair',
-                       'cow', 'diningtable', 'dog', 'horse',
-                       'motorbike', 'person', 'pottedplant',
-                       'sheep', 'sofa', 'train', 'tvmonitor'])
+#  pascal_classes = np.asarray(['__background__',
+#                       'aeroplane', 'bicycle', 'bird', 'boat',
+#                       'bottle', 'bus', 'car', 'cat', 'chair',
+#                       'cow', 'diningtable', 'dog', 'horse',
+#                       'motorbike', 'person', 'pottedplant',
+#                       'sheep', 'sofa', 'train', 'tvmonitor'])
+
+
+  pascal_classes = np.asarray(['__background__','table'])
 
   # initilize the network here.
   if args.net == 'vgg16':
@@ -231,7 +236,7 @@ if __name__ == '__main__':
 
   start = time.time()
   max_per_image = 100
-  thresh = 0.05
+  thresh = 0.97
   vis = True
 
   webcam_num = args.webcam_num
@@ -361,7 +366,8 @@ if __name__ == '__main__':
       if vis and webcam_num == -1:
           # cv2.imshow('test', im2show)
           # cv2.waitKey(0)
-          result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
+          # result_path = os.path.join(args.image_dir, imglist[num_images][:-4] + "_det.jpg")
+          result_path = os.path.join('demo_results/', imglist[num_images][:-4] + "_det.jpg")
           cv2.imwrite(result_path, im2show)
       else:
           im2showRGB = cv2.cvtColor(im2show, cv2.COLOR_BGR2RGB)
@@ -375,3 +381,5 @@ if __name__ == '__main__':
   if webcam_num >= 0:
       cap.release()
       cv2.destroyAllWindows()
+
+

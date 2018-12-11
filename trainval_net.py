@@ -33,6 +33,13 @@ from model.utils.net_utils import weights_normal_init, save_net, load_net, \
 from model.faster_rcnn.vgg16 import vgg16
 from model.faster_rcnn.resnet import resnet
 
+# if devices are not visible
+
+import os
+os.environ["CUDA_VISIBLE_DEVICES"] = '0'
+
+
+
 def parse_args():
   """
   Parse input arguments
@@ -49,7 +56,7 @@ def parse_args():
                       default=1, type=int)
   parser.add_argument('--epochs', dest='max_epochs',
                       help='number of epochs to train',
-                      default=20, type=int)
+                      default=200, type=int)
   parser.add_argument('--disp_interval', dest='disp_interval',
                       help='number of iterations to display',
                       default=100, type=int)
@@ -58,7 +65,8 @@ def parse_args():
                       default=10000, type=int)
 
   parser.add_argument('--save_dir', dest='save_dir',
-                      help='directory to save models', default="models",
+                      help='directory to save models', default="/detection/trained-models",
+
                       type=str)
   parser.add_argument('--nw', dest='num_workers',
                       help='number of worker to load data',
@@ -74,7 +82,7 @@ def parse_args():
                       action='store_true')
   parser.add_argument('--bs', dest='batch_size',
                       help='batch_size',
-                      default=1, type=int)
+                      default=2, type=int)
   parser.add_argument('--cag', dest='class_agnostic',
                       help='whether perform class_agnostic bbox regression',
                       action='store_true')
@@ -156,6 +164,10 @@ if __name__ == '__main__':
       args.imdb_name = "voc_2007_trainval"
       args.imdbval_name = "voc_2007_test"
       args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
+  elif args.dataset == "table":
+      args.imdb_name = "tables_train"
+      args.imdbval_name = "tables_test"
+      args.set_cfgs = ['ANCHOR_SCALES', '[8, 16, 32]', 'ANCHOR_RATIOS', '[0.5,1,2]', 'MAX_NUM_GT_BOXES', '20']
   elif args.dataset == "pascal_voc_0712":
       args.imdb_name = "voc_2007_trainval+voc_2012_trainval"
       args.imdbval_name = "voc_2007_test"
@@ -219,6 +231,7 @@ if __name__ == '__main__':
 
   # ship to cuda
   if args.cuda:
+    
     im_data = im_data.cuda()
     im_info = im_info.cuda()
     num_boxes = num_boxes.cuda()
@@ -306,6 +319,7 @@ if __name__ == '__main__':
         lr *= args.lr_decay_gamma
 
     data_iter = iter(dataloader)
+    
     for step in range(iters_per_epoch):
       data = next(data_iter)
       im_data.data.resize_(data[0].size()).copy_(data[0])
@@ -380,5 +394,9 @@ if __name__ == '__main__':
     }, save_name)
     print('save model: {}'.format(save_name))
 
-  if args.use_tfboard:
-    logger.close()
+
+    end = time.time()
+    print(end - start)
+
+
+
